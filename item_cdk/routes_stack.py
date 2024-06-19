@@ -35,7 +35,7 @@ class RoutesStack(Stack):
 
         http_api_stack.http_api.add_routes(
             path="/inventory",
-            methods=[HttpMethod.GET],
+            methods=[HttpMethod.POST],
             integration=HttpLambdaIntegration(
                 "InventoryListIntegration",
                 handler=self.create_function,
