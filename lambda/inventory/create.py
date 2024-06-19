@@ -1,9 +1,11 @@
 import json
 import boto3
+import os
 
 dynamodb = boto3.resource('dynamodb')
+table_name = os.environ['TABLE_NAME']
 table = dynamodb.Table(
-    "ItemCdkStackDatabaseStackC8E485B5-InventoryTableFD135387-1NMBHG6644689")
+    table_name)
 
 
 def lambda_handler(event, context):

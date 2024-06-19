@@ -1,4 +1,4 @@
-from aws_cdk import Stack
+from aws_cdk import CfnOutput, Stack
 from aws_cdk.aws_dynamodb import Table, TableEncryption, AttributeType
 from constructs import Construct
 
@@ -17,3 +17,6 @@ class DatabaseStack(Stack):
             point_in_time_recovery=True,
             deletion_protection=True
         )
+
+        CfnOutput(self, "TableName", value=self.table.table_name,
+                  export_name="TableName")
