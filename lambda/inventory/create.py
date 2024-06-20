@@ -18,7 +18,7 @@ def lambda_handler(event, context):
     category = body['category']
     price = Decimal(str(body['price']))
 
-    last_updated_dt = datetime.now().isoformat()
+    last_updated_at = datetime.now().isoformat()
 
     # Check if item_name exists
     response = table.query(
@@ -29,18 +29,15 @@ def lambda_handler(event, context):
     if response['Items']:
         # Update existing item
         item_id = response['Items'][0]['id']
-        existing_last_updated_dt = response['Items'][0]['last_updated_dt']
         try:
             table.update_item(
                 Key={'id': item_id},
-                UpdateExpression="set price = :p, category = :c, last_updated_dt = :lud",
+                UpdateExpression="set price = :p, category = :c, last_updated_at = :lud",
                 ExpressionAttributeValues={
                     ':p': price,
                     ':c': category,
-                    ':lud': last_updated_dt,
-                    ':elud': existing_last_updated_dt
+                    ':lud': last_updated_at,
                 },
-                ConditionExpression="last_updated_dt = :elud",  # Ensure no concurrent updates
                 ReturnValues="UPDATED_NEW"
             )
             return {
@@ -60,18 +57,27 @@ def lambda_handler(event, context):
                 Item={
                     'id': item_id,
                     'item_name': item_name,
+                    'lower_case_name': item_name.lower(),
                     'category': category,
                     'price': price,
-                    'last_updated_dt': last_updated_dt
+                    'last_updated_at': last_updated_at
                 },
                 ReturnValues="ALL_OLD"
             )
             return {
                 'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
                 'body': json.dumps({'id': item_id})
             }
         except ClientError as e:
             return {
                 'statusCode': 500,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
                 'body': json.dumps('Error inserting/updating item: {}'.format(e.response['Error']['Message']))
             }

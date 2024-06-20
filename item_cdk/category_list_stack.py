@@ -9,35 +9,35 @@ from item_cdk.http_api_stack import HttpApiStack
 from item_cdk.database_stack import DatabaseStack
 
 
-class RoutesStack(Stack):
+class CategoryListStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, http_api_stack: HttpApiStack, database_stack: DatabaseStack, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         table_name = Fn.import_value("TableName")
 
-        self.create_function = Function(
-            self, "InventoryListFunction",
+        self.query_function = Function(
+            self, "CategoryListFunction",
             runtime=Runtime.PYTHON_3_8,
-            handler="create.lambda_handler",
-            code=Code.from_asset("lambda/inventory"),
+            handler="list.lambda_handler",
+            code=Code.from_asset("lambda/category"),
             environment={
                 'TABLE_NAME': table_name
             }
         )
-        self.create_function.add_to_role_policy(
+        self.query_function.add_to_role_policy(
             PolicyStatement(
-                actions=["dynamodb:PutItem"],
+                actions=["dynamodb:Scan"],
                 resources=[database_stack.table.table_arn]
             )
         )
-        database_stack.table.grant_read_write_data(self.create_function)
+        database_stack.table.grant_read_write_data(self.query_function)
 
         http_api_stack.http_api.add_routes(
-            path="/inventory",
-            methods=[HttpMethod.POST],
+            path="/category",
+            methods=[HttpMethod.GET],
             integration=HttpLambdaIntegration(
-                "InventoryListIntegration",
-                handler=self.create_function,
+                "CategoryListIntegration",
+                handler=self.query_function,
             )
         )

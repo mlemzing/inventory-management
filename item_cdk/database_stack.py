@@ -10,26 +10,37 @@ class DatabaseStack(Stack):
 
         self.table = Table(
             self,
-            "InventoryTable",
+            "ProductTable",
+            # PK is the id of the item
             partition_key={"name": "id", "type": AttributeType.STRING},
-            sort_key={"name": "last_updated_dt", "type": AttributeType.STRING},
             encryption=TableEncryption.AWS_MANAGED,
             point_in_time_recovery=True,
-            deletion_protection=True
+            deletion_protection=False
         )
 
         self.table.add_global_secondary_index(
             index_name="ItemNameIndex",
             partition_key={"name": "item_name", "type": AttributeType.STRING},
-            sort_key={"name": "last_updated_dt", "type": AttributeType.STRING},
+            projection_type=ProjectionType.ALL
+        )
+        self.table.add_global_secondary_index(
+            index_name="CategoryIndex",
+            partition_key={"name": "category", "type": AttributeType.STRING},
             projection_type=ProjectionType.ALL
         )
         # self.table.add_global_secondary_index(
-        #     index_name="LastUpdatedIndex",
-        #     partition_key={"name": "category", "type": AttributeType.STRING},
-        #     sort_key={"name": "last_updated_dt", "type": AttributeType.STRING},
+        #     index_name="LastUpdatedAtIndex",
+        #     partition_key={"name": "last_updated_at",
+        #                    "type": AttributeType.STRING},
         #     projection_type=ProjectionType.ALL
         # )
+        self.table.add_global_secondary_index(
+            index_name="IDToLastUpdatedAtIndex",
+            partition_key={"name": "id", "type": AttributeType.STRING},
+            sort_key={"name": "last_updated_at",
+                      "type": AttributeType.STRING},
+            projection_type=ProjectionType.ALL
+        )
 
         CfnOutput(self, "TableName", value=self.table.table_name,
                   export_name="TableName")
