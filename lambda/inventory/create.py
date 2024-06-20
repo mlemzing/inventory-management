@@ -42,11 +42,19 @@ def lambda_handler(event, context):
             )
             return {
                 'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
                 'body': json.dumps({'id': item_id})
             }
         except ClientError as e:
             return {
                 'statusCode': 500,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
                 'body': json.dumps(f"Error updating item: {e.response['Error']['Message']}")
             }
     else:

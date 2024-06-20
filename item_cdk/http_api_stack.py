@@ -11,8 +11,8 @@ class HttpApiStack(Stack):
             self,
             "InventoryHttpApi",
             cors_preflight=CorsPreflightOptions(
-                allow_origins=["*", "http://localhost:3000"],
-                allow_headers=["Authorization"],
+                allow_origins=["*"],
+                allow_headers=["*"],
                 allow_methods=[CorsHttpMethod.POST, CorsHttpMethod.GET,
                                CorsHttpMethod.PUT, CorsHttpMethod.DELETE],
             ),

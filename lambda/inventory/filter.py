@@ -32,9 +32,13 @@ def lambda_handler(event, context):
         # Build the filter expression
         filter_expression = None
 
-        if name_filter:
-            filter_expression = Attr(
-                'item_name_lower').contains(name_filter.lower())
+        if name_filter is not None:
+            if name_filter.strip() != "":
+                filter_expression = Attr('lower_case_name').contains(
+                    str(name_filter).lower())
+        # if name_filter:
+        #     filter_expression = Attr(
+        #         'lower_case_name').contains(str(name_filter).lower())
 
         if category_filter:
             if filter_expression:
@@ -51,9 +55,11 @@ def lambda_handler(event, context):
 
         # Set up the scan parameters
         scan_params = {
-            'FilterExpression': filter_expression,
+            # 'FilterExpression': filter_expression,
             'Limit': limit
         }
+        if filter_expression:
+            scan_params['FilterExpression'] = filter_expression
 
         # Perform the scan operation
         response = table.scan(**scan_params)
